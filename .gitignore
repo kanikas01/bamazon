@@ -1,0 +1,7 @@
+node_modules
+.DS_Store
+.env
+*~
+*.swp
+*.swo
+log.txt
