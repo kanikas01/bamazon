@@ -12,33 +12,13 @@ CREATE TABLE products (
 );
 
 INSERT INTO products (product_name, department_name, price, stock_quantity) 
-  VALUES ('broccoli', 'grocery', 1.29, 20);
-
-INSERT INTO products (product_name, department_name, price, stock_quantity) 
-  VALUES ('almond milk', 'grocery', 3.50, 20);
-
-INSERT INTO products (product_name, department_name, price, stock_quantity) 
-  VALUES ('basketball', 'sporting goods', 25.99, 20);
-
-INSERT INTO products (product_name, department_name, price, stock_quantity) 
-  VALUES ('t-shirt', 'clothing', 8.00, 20);
-
-INSERT INTO products (product_name, department_name, price, stock_quantity) 
-  VALUES ('ibuprofen', 'pharmacy', 15.74, 20);
-
---
-
-INSERT INTO products (product_name, department_name, price, stock_quantity) 
-  VALUES ('catnip', 'pet supplies', 12.25, 20);
-
-INSERT INTO products (product_name, department_name, price, stock_quantity) 
-  VALUES ('coffee', 'grocery', 15.00, 20);
-
-INSERT INTO products (product_name, department_name, price, stock_quantity) 
-  VALUES ('dog leash', 'pet supplies', 9.99, 20);
-
-INSERT INTO products (product_name, department_name, price, stock_quantity) 
-  VALUES ('unicycle', 'sporting goods', 80, 20);
-
-INSERT INTO products (product_name, department_name, price, stock_quantity) 
-  VALUES ('sweater', 'clothing', 45, 20);
+  VALUES ('broccoli', 'grocery', 1.29, 20),
+         ('almond milk', 'grocery', 3.50, 20),
+         ('basketball', 'sporting goods', 25.99, 20),
+         ('t-shirt', 'clothing', 8.00, 20),
+         ('ibuprofen', 'pharmacy', 15.74, 20),
+         ('catnip', 'pet supplies', 12.25, 20),
+         ('coffee', 'grocery', 15.00, 20),
+         ('dog leash', 'pet supplies', 9.99, 20),
+         ('unicycle', 'sporting goods', 80, 20),
+         ('sweater', 'clothing', 45, 20);
