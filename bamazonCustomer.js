@@ -25,8 +25,8 @@ db.connect();
 // Query 'product' table
 queryProducts(db);
 
-// Close DB connection
-db.end();
+// Put user through purchase path
+setTimeout(makePurchase, 50, db);
 
 
 // ---------- Function definitions ---------- //
@@ -36,39 +36,27 @@ function queryProducts(connection) {
   connection.query(`SELECT id,
                       product_name AS product, 
                       department_name AS department, 
-                      price 
+                      price,
+                      stock_quantity AS quantity
                     FROM products`, function (error, results, fields) {
     if (error) throw error;
 
-    var idWidth = 0;
-    var productWidth = 0;
-    var departmentWidth = 0;
-    var priceWidth = 0;
-
-    // Set width of each column based on the entry that has the most chars
-    results.forEach(element => {
-      if (element.id.length > idWidth) {
-        idWidth = element.id.length;
-      }
-      if (element.product.length > productWidth) { 
-        productWidth = element.product.length; 
-      }
-      if (element.department.length > departmentWidth) { 
-        departmentWidth = element.department.length; 
-      }
-      if (String(element.price).length > priceWidth) { 
-        priceWidth = String(element.price).length; 
-      }
-    });
+    // Set column widths
+    var idWidth = 5;
+    var productWidth = 16;
+    var departmentWidth = 16;
+    var priceWidth = 7;
+    var quantityWidth = 12;
 
     // Set table width based on combined widths of columns
     var tableWidth = idWidth +
                      productWidth + 
                      departmentWidth + 
                      priceWidth + 
-                     (fields.length * 2) + 2;
+                     quantityWidth +
+                     (fields.length * 2);
 
-    // Set horizontal rule
+    // Create horizontal rule for table display
     var horizontalRule = separatorColor(separatorChar.repeat(tableWidth))
 
     console.log(horizontalRule);
@@ -77,19 +65,72 @@ function queryProducts(connection) {
     console.log(fieldColor(fields[0].name.toUpperCase().padEnd(idWidth + 3), 
                            fields[1].name.toUpperCase().padEnd(productWidth + 1), 
                            fields[2].name.toUpperCase().padEnd(departmentWidth + 1),
-                           fields[3].name.toUpperCase().padEnd(priceWidth + 1),));
+                           fields[3].name.toUpperCase().padEnd(priceWidth + 5),
+                           fields[4].name.toUpperCase().padEnd(quantityWidth + 1)));
 
     console.log(horizontalRule);
 
-    // Display query results
+    // Display query results (numeric types must be cast as strings)
     results.forEach(element => {
       console.log(String(element.id).padEnd(idWidth + 3),
-                  String(element.product).padEnd(productWidth + 1), 
-                  String(element.department).padEnd(departmentWidth + 1), 
-            '$' + String(element.price.toFixed(2)).padStart(priceWidth + 1));
+                         element.product.padEnd(productWidth + 1), 
+                         element.department.padEnd(departmentWidth + 1), 
+           '$ ' + String(element.price.toFixed(2)).padEnd(priceWidth + 3),
+                  String(element.quantity).padEnd(quantityWidth + 1),);
     });
 
     console.log(horizontalRule);
+  });
+}
+
+function makePurchase(connection) {
+  var questions = [
+    {
+      type: 'input',
+      name: 'product_id',
+      message: "Enter the ID for the product would you like to buy:"
+    },
+    {
+      type: 'input',
+      name: 'quantity',
+      message: "How many would you like?",
+    }
+  ];
+
+  inquirer.prompt(questions).then(answers => {
+    connection.query(`SELECT stock_quantity, price
+                      FROM products
+                      WHERE id=?`, [answers.product_id], function (error, results, fields) {
+      if (error) throw error;
+      if(results[0].stock_quantity < answers.quantity) {
+        console.log("Insufficient quantity!");
+      } 
+      else {
+        var newQuantity = results[0].stock_quantity - answers.quantity;
+        console.log('Your total cost is $' + (results[0].price * answers.quantity) + '.');
+        connection.query(`UPDATE products
+                          SET stock_quantity =?
+                          WHERE id=?`, [newQuantity, answers.product_id], function (error, results, fields) {
+          if (error) throw error;
+        });
+
+      }
+      inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'buyAgain',
+          message: "Would you like to make another purchase?",
+          default: false
+        }]).then(answers => {
+          if (answers.buyAgain) {
+            queryProducts(db);
+            setTimeout(makePurchase, 50, db);
+          }
+          else {
+            connection.end();
+          }
+      });
+    });
   });
 }
 
