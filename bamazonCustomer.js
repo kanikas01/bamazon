@@ -12,33 +12,32 @@ var separatorColor = chalk.green;
 var fieldColor = chalk.yellow;
 
 // Create connection object
-var db = mysql.createConnection({
+var connection = mysql.createConnection({
   host: keys.mysql_db.host,
   user: keys.mysql_db.username,
   password: keys.mysql_db.password,
   database: keys.mysql_db.database
 });
 
-// Connect to DB
-db.connect();
-
-// Query 'product' table
-queryProducts(db);
-
-// Put user through purchase path
-setTimeout(makePurchase, 50, db);
-
-
-// ---------- Function definitions ---------- //
-
-function queryProducts(connection) {
-  // Execute query
-  connection.query(`SELECT id,
+var generalQuery = `SELECT id,
                       product_name AS product, 
                       department_name AS department, 
                       price,
                       stock_quantity AS quantity
-                    FROM products`, function (error, results, fields) {
+                    FROM products`;
+
+// Connect to DB
+connection.connect();
+
+// Query 'product' table and pass makePurchase as callback
+queryProducts(connection, generalQuery, makePurchase);
+
+
+// ---------- Function definitions ---------- //
+
+function queryProducts(connection, query, callback) {
+  // Execute query
+  connection.query(query, function (error, results, fields) {
     if (error) throw error;
 
     // Set column widths
@@ -80,6 +79,11 @@ function queryProducts(connection) {
     });
 
     console.log(horizontalRule);
+
+    if (callback) {
+      callback(connection);
+    }
+
   });
 }
 
@@ -87,7 +91,7 @@ function makePurchase(connection) {
   var questions = [
     {
       type: 'input',
-      name: 'product_id',
+      name: 'productID',
       message: "Enter the ID for the product would you like to buy:"
     },
     {
@@ -100,9 +104,9 @@ function makePurchase(connection) {
   inquirer.prompt(questions).then(answers => {
     connection.query(`SELECT stock_quantity, price
                       FROM products
-                      WHERE id=?`, [answers.product_id], function (error, results, fields) {
+                      WHERE id=?`, [answers.productID], function (error, results, fields) {
       if (error) throw error;
-      if(results[0].stock_quantity < answers.quantity) {
+      if (results[0].stock_quantity < answers.quantity) {
         console.log("Insufficient quantity!");
       } 
       else {
@@ -110,7 +114,7 @@ function makePurchase(connection) {
         console.log('Your total cost is $' + (results[0].price * answers.quantity) + '.');
         connection.query(`UPDATE products
                           SET stock_quantity =?
-                          WHERE id=?`, [newQuantity, answers.product_id], function (error, results, fields) {
+                          WHERE id=?`, [newQuantity, answers.productID], function (error, results, fields) {
           if (error) throw error;
         });
 
@@ -123,10 +127,10 @@ function makePurchase(connection) {
           default: false
         }]).then(answers => {
           if (answers.buyAgain) {
-            queryProducts(db);
-            setTimeout(makePurchase, 50, db);
+            queryProducts(connection, generalQuery, makePurchase);
           }
           else {
+            // queryProducts(connection, generalQuery);
             connection.end();
           }
       });
@@ -134,4 +138,4 @@ function makePurchase(connection) {
   });
 }
 
-
+module.exports = { connection, generalQuery, queryProducts };
