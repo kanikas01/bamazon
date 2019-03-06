@@ -14,20 +14,16 @@ var connection = mysql.createConnection({
   database: process.env.DB_DATABASE
 });
 
-// General query to return all rows in products table
-var generalQuery = `SELECT id,
+/* Provides a general query with results displayed in a customer-friendly fashion
+Accepts optional callback function to run after query is complete. */
+function showCustomerView(connection, callback) {
+  // Execute query
+  connection.query(`SELECT id,
                       product_name AS product, 
                       department_name AS department, 
                       price,
                       stock_quantity AS quantity
-                    FROM products`;
-
-/* Provides nice formatting for any query that returns all fields in 'products'.
-Order must be: id, product_name, department_name, price, stock_quantity
-Accepts optional callback function to run after query is complete. */
-function queryProducts(connection, query, callback) {
-  // Execute query
-  connection.query(query, function (error, results, fields) {
+                    FROM products`, function (error, results, fields) {
     if (error) throw error;
 
     // Set column widths
@@ -47,7 +43,8 @@ function queryProducts(connection, query, callback) {
 
     // Create horizontal rule for table display
     var horizontalRule = separatorColor(separatorChar.repeat(tableWidth))
-
+    
+    console.log();
     console.log(horizontalRule);
 
     // Display column names
@@ -68,7 +65,7 @@ function queryProducts(connection, query, callback) {
                   String(element.quantity).padEnd(quantityWidth + 1));
     });
 
-    console.log(horizontalRule);
+    console.log(horizontalRule, '\n');
 
     if (callback) {
       callback(connection);
@@ -77,4 +74,4 @@ function queryProducts(connection, query, callback) {
   });
 }
 
-module.exports = { connection, generalQuery, queryProducts };
+module.exports = { connection, generalQuery, showCustomerView };
