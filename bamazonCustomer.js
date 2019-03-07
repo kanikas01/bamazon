@@ -5,9 +5,9 @@ require('dotenv').config();
 var inquirer = require('inquirer');
 var db_utils = require('./db_utils.js');
 var connection = db_utils.connection;
+var getNumProducts = db_utils.getNumProducts;
 var showCustomerView = db_utils.showCustomerView;
-
-productTableInfo = {};
+var productTableInfo = {};
 
 // Connect to DB
 connection.connect(function (err) {
@@ -16,7 +16,9 @@ connection.connect(function (err) {
     return;
   }
 
-  getNumProducts();
+  // Add number of products to productTableInfo
+  getNumProducts(productTableInfo);
+
   // Query products db, passing makePurchase as callback
   showCustomerView(connection, makePurchase);
 });
@@ -33,9 +35,9 @@ function makePurchase(connection) {
       validate: function(value) {
         if (value === '0') {
           connection.end();
-          process.exit(0);
+          process.exit();
         }
-        if (!(value <= productTableInfo.numProducts)) {
+        if (!(value <= productTableInfo.numProducts) || !(/\d+/.exec(value))) {
           return 'Error! Please enter a valid product ID.';
         }
         return true;
@@ -47,7 +49,6 @@ function makePurchase(connection) {
       message: "How many would you like?",
     }
   ];
-  
   
   inquirer.prompt(questions).then(answers => {
     connection.query(`SELECT stock_quantity, price
@@ -80,16 +81,9 @@ function makePurchase(connection) {
           else {
             // showCustomerView(connection, generalQuery);
             connection.end();
-            process.exit(0);
+            process.exit();
           }
       });
     });
-  });
-}
-
-function getNumProducts(id) {
-  connection.query(`SELECT id FROM products`, function (error, results, fields) {
-    if (error) throw error;
-    productTableInfo.numProducts = results.length;
   });
 }
