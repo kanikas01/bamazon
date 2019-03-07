@@ -74,4 +74,12 @@ function showCustomerView(connection, callback) {
   });
 }
 
-module.exports = { connection, generalQuery, showCustomerView };
+// Add number of products available for purchase to productTableInfo
+function getNumProducts(myObj) {
+  connection.query(`SELECT id FROM products`, function (error, results, fields) {
+    if (error) throw error;
+    myObj.numProducts = results.length;
+  });
+}
+
+module.exports = { connection, showCustomerView, getNumProducts };
