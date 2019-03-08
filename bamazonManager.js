@@ -25,9 +25,10 @@ connection.connect(function (err) {
 // ---------- Function definitions ---------- //
 
 function main() {
-  // getProductTableInfo(productTableInfo);
+  // Update products table info
   getProductTableInfo(productTableInfo);
 
+  // Define main menu options
   var questions = [
     {
       type: 'list',
@@ -42,6 +43,7 @@ function main() {
     }
   ];
 
+  // Prompt user to choose an action
   inquirer.prompt(questions).then(answers => {
     switch (answers.choice) {
       case 'View products for sale':
@@ -65,7 +67,9 @@ function main() {
   });
 }
 
+// Displays all products available for sale
 function viewProductsForSale(callback) {
+  // Query DB
   connection.query(`SELECT id,
                       product_name, 
                       department_name, 
@@ -73,14 +77,18 @@ function viewProductsForSale(callback) {
                       stock_quantity
                     FROM products`, function (error, results, fields) {
     if (error) throw error;
+
+    // Display results
     console.log();
     console.table(results);
+
     if (callback) {
       callback();
     }
   });
 }
 
+// Displays products for which there is low inventory
 function viewLowInventory(callback) {
   connection.query(`SELECT id,
                       product_name AS product, 
@@ -104,6 +112,7 @@ function viewLowInventory(callback) {
   });
 }
 
+// Increases stock_quantity of items
 function addToInventory(callback) {
   // Define questions
   var questions = [
@@ -152,8 +161,7 @@ function addToInventory(callback) {
         if (error) throw error;
         
         // Alert user that stock_quantity has been updated 
-        console.log();
-        console.log('Quantity is now ' + newQuantity + '.\n')
+        console.log('\nQuantity is now ' + newQuantity + '.\n')
 
         if (callback) {
           callback();
@@ -163,13 +171,24 @@ function addToInventory(callback) {
   });
 }
 
+// Adds new product to products table
 function addNewProduct(callback) {
   // Define questions
   var questions = [
     {
       type: 'input',
       name: 'name',
-      message: "Product name: "
+      message: "Product name: ",
+      validate: function (value) {
+        if (!(/\w+/.exec(value))) {
+          return 'Error! Please enter a valid product name.';
+        }
+
+        if (productTableInfo.productNames.includes(value)) {
+          return 'Error! A product with that name already exists. Please enter another name. ';
+        }
+        return true;
+      }
     },
     {
       type: 'list',
@@ -180,20 +199,49 @@ function addNewProduct(callback) {
     {
       type: 'input',
       name: 'price',
-      message: "Product price: "
+      message: "Product price: ",
+      validate: function (value) {
+        if (!(/^\d+\.?(\d+)?$/.exec(value))) {
+          return 'Error! Please enter a valid price.';
+        }
+        return true;
+      }
     },
     {
       type: 'input',
       name: 'quantity',
-      message: "Initial quantity: "
+      message: "Initial quantity: ",
+      validate: function (value) {
+        if (!(/^\d+$/.exec(value))) {
+          return 'Error! Please enter a valid quantity.';
+        }
+        return true;
+      }
     }
   ];
 
+  // Prompt user for new product info
   inquirer.prompt(questions).then(answers => {
-    // execute UPDATE query
-    console.log(answers);
-    if (callback) {
-      callback();
-    }
+    // Execute UPDATE query
+    connection.query(`INSERT INTO products 
+                        ( product_name, 
+                          department_name,
+                          price,
+                          stock_quantity )
+                      VALUES(?, ?, ?, ?)`,
+                        [ answers.name,
+                          answers.department,
+                          answers.price,
+                          answers.quantity ], 
+                          function (error, results, fields) {
+      if (error) throw error;
+
+      // Alert user that product has been added
+      console.log('\nProduct added.\n');
+      
+      if (callback) {
+        callback();
+      }
+    });
   });
 }
