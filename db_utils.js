@@ -74,19 +74,23 @@ function showCustomerView(connection, callback) {
   });
 }
 
-// Add number of products available for purchase to productTableInfo
+// Get all products, ids and departments from the `products` table
 function getProductTableInfo(myObj) {
   connection.query(`SELECT * FROM products`, function (error, results, fields) {
     if (error) throw error;
     myObj.numProducts = results.length;
     myObj.departments = [];
     myObj.productIDs = [];
+    myObj.productNames = [];
     results.forEach(element => {
       if (!myObj.departments.includes(element.department_name)) {
         myObj.departments.push(element.department_name);
       }
       if (!myObj.productIDs.includes(element.id)) {
         myObj.productIDs.push(String(element.id));
+      }
+      if (!myObj.productNames.includes(element.product_name)) {
+        myObj.productNames.push(String(element.product_name));
       }
       myObj.departments.sort();
     });
