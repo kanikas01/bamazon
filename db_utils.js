@@ -75,7 +75,7 @@ function showCustomerView(connection, callback) {
 }
 
 // Add number of products available for purchase to productTableInfo
-function getNumProducts(myObj) {
+function getProductTableInfo(myObj) {
   connection.query(`SELECT id FROM products`, function (error, results, fields) {
     if (error) throw error;
     myObj.numProducts = results.length;

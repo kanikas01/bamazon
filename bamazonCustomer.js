@@ -5,7 +5,7 @@ require('dotenv').config();
 var inquirer = require('inquirer');
 var db_utils = require('./db_utils.js');
 var connection = db_utils.connection;
-var getNumProducts = db_utils.getNumProducts;
+var getProductTableInfo = db_utils.getProductTableInfo;
 var showCustomerView = db_utils.showCustomerView;
 var productTableInfo = {};
 
@@ -17,7 +17,7 @@ connection.connect(function (err) {
   }
 
   // Add number of products to productTableInfo
-  getNumProducts(productTableInfo);
+  getProductTableInfo(productTableInfo);
 
   // Query products db, passing makePurchase as callback
   showCustomerView(connection, makePurchase);
