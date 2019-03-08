@@ -8,6 +8,7 @@ var db_utils = require('./db_utils.js');
 var connection = db_utils.connection;
 var getProductTableInfo = db_utils.getProductTableInfo;
 var showCustomerView = db_utils.showCustomerView;
+var productTableInfo = {};
 
 // Connect to DB
 connection.connect(function (err) {
@@ -15,6 +16,8 @@ connection.connect(function (err) {
     console.error('error connecting: ' + err.stack);
     return;
   }
+
+  getProductTableInfo(productTableInfo);
 
   // Execute main function
   main();
@@ -124,7 +127,6 @@ async function addToInventory(callback) {
                       price,
                       stock_quantity
                     FROM products`, function (error, results, fields) {
-                      
         if (error) throw error;
         if (callback) {
           callback();
@@ -138,34 +140,31 @@ function addNewProduct(callback) {
     {
       type: 'input',
       name: 'name',
-      message: "Product name: ",
+      message: "Product name: "
     },
     {
-      type: 'input',
+      type: 'list',
       name: 'department',
       message: "Product department: ",
+      choices: productTableInfo.departments
     },
     {
       type: 'input',
       name: 'price',
-      message: "Product price: ",
+      message: "Product price: "
     },
     {
       type: 'input',
       name: 'quantity',
-      message: "Initial quantity: ",
+      message: "Initial quantity: "
     }
   ];
 
-  // display all current products
-  // prompt for product name
-  // prompt for product department
-  // prompt for product price
-  // prompt for product quantity
-
-  // execute UPDATE query
-
-  if (callback) {
-    callback();
-  }
+  inquirer.prompt(questions).then(answers => {
+    // execute UPDATE query
+    console.log(answers);
+    if (callback) {
+      callback();
+    }
+  });
 }
