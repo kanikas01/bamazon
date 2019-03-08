@@ -37,7 +37,7 @@ function makePurchase(connection) {
           connection.end();
           process.exit();
         }
-        if (!(value <= productTableInfo.numProducts) || !(/\d+/.exec(value))) {
+        if (!(productTableInfo.productIDs.includes(value)) || !(/\d+/.exec(value))) {
           return 'Error! Please enter a valid product ID.';
         }
         return true;
