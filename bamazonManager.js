@@ -105,6 +105,7 @@ function viewLowInventory(callback) {
 }
 
 function addToInventory(callback) {
+  // Define questions
   var questions = [
     {
       type: 'input',
@@ -115,7 +116,7 @@ function addToInventory(callback) {
           connection.end();
           process.exit();
         }
-        if (!(productTableInfo.productIDs.includes(value)) || !(/\d+/.exec(value))) {
+        if (!(productTableInfo.productIDs.includes(value)) || !(/^\d+$/.exec(value))) {
           return 'Error! Please enter a valid product ID.';
         }
         return true;
@@ -124,27 +125,46 @@ function addToInventory(callback) {
     {
       type: 'input',
       name: 'quantity',
-      message: "Quantity to add: "
+      message: "Quantity to add: ",
+      validate: function(value) {
+        if (!(/^\d+$/.exec(value))) {
+          return 'Error! Please enter a valid quantity.';
+        }
+        return true;
+      }
     }
   ];
 
+  // Prompt user for info
   inquirer.prompt(questions).then(answers => {
-    console.log(answers);
-    connection.query(`SELECT id,
-                      product_name, 
-                      department_name, 
-                      price,
-                      stock_quantity
-                    FROM products`, function (error, results, fields) {
+    // Check current stock and calculate new stock_quantity
+    connection.query(`SELECT stock_quantity
+                      FROM products
+                      WHERE id=?`, [answers.id], function (error, results, fields) {
+      if (error) throw error;
+      var newQuantity = Number(answers.quantity) + parseInt(Number(results[0].stock_quantity));
+  
+      // Update products table with new stock_quantity
+      connection.query(`UPDATE products
+                        SET stock_quantity =?
+                        WHERE id=?`,
+                        [newQuantity, answers.id], function (error, results, fields) {
         if (error) throw error;
+        
+        // Alert user that stock_quantity has been updated 
+        console.log();
+        console.log('Quantity is now ' + newQuantity + '.\n')
+
         if (callback) {
           callback();
         }
       });
+    });
   });
 }
 
 function addNewProduct(callback) {
+  // Define questions
   var questions = [
     {
       type: 'input',
