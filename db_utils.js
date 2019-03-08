@@ -76,10 +76,19 @@ function showCustomerView(connection, callback) {
 
 // Add number of products available for purchase to productTableInfo
 function getProductTableInfo(myObj) {
-  connection.query(`SELECT id FROM products`, function (error, results, fields) {
+  connection.query(`SELECT * FROM products`, function (error, results, fields) {
     if (error) throw error;
     myObj.numProducts = results.length;
+    myObj.departments = [];
+    results.forEach(element => {
+      if (!myObj.departments.includes(element.department_name)) {
+        myObj.departments.push(element.department_name);
+      }
+      myObj.departments.sort();
+    });
   });
 }
 
 module.exports = { connection, showCustomerView, getProductTableInfo };
+
+
