@@ -82,4 +82,4 @@ function getProductTableInfo(myObj) {
   });
 }
 
-module.exports = { connection, showCustomerView, getNumProducts };
+module.exports = { connection, showCustomerView, getProductTableInfo };
