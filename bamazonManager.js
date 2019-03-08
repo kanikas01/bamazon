@@ -17,8 +17,6 @@ connection.connect(function (err) {
     return;
   }
 
-  getProductTableInfo(productTableInfo);
-
   // Execute main function
   main();
 
@@ -27,6 +25,8 @@ connection.connect(function (err) {
 // ---------- Function definitions ---------- //
 
 function main() {
+  // getProductTableInfo(productTableInfo);
+  getProductTableInfo(productTableInfo);
 
   var questions = [
     {
@@ -104,18 +104,27 @@ function viewLowInventory(callback) {
   });
 }
 
-
-async function addToInventory(callback) {
+function addToInventory(callback) {
   var questions = [
     {
       type: 'input',
       name: 'id',
       message: "Product ID: ",
+      validate: function (value) {
+        if (value === '0') {
+          connection.end();
+          process.exit();
+        }
+        if (!(productTableInfo.productIDs.includes(value)) || !(/\d+/.exec(value))) {
+          return 'Error! Please enter a valid product ID.';
+        }
+        return true;
+      }
     },
     {
       type: 'input',
       name: 'quantity',
-      message: "Quantity to add: ",
+      message: "Quantity to add: "
     }
   ];
 
