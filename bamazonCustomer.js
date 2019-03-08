@@ -27,6 +27,7 @@ connection.connect(function (err) {
 // ---------- Function definitions ---------- //
 
 function makePurchase(connection) {
+  // Define questions
   var questions = [
     {
       type: 'input',
@@ -47,9 +48,16 @@ function makePurchase(connection) {
       type: 'input',
       name: 'quantity',
       message: "How many would you like?",
+      validate: function (value) {
+        if (!(/^\d+$/.exec(value))) {
+          return 'Error! Please enter a valid quantity.';
+        }
+        return true;
+      }
     }
   ];
-  
+
+  // Query user for purchase info, then update DB with new quantity
   inquirer.prompt(questions).then(answers => {
     connection.query(`SELECT stock_quantity, price
                       FROM products
@@ -66,8 +74,9 @@ function makePurchase(connection) {
                           WHERE id=?`, [newQuantity, answers.productID], function (error, results, fields) {
           if (error) throw error;
         });
-
       }
+
+      // Ask user if they would like to make another purchase
       inquirer.prompt([
         {
           type: 'confirm',
@@ -79,7 +88,6 @@ function makePurchase(connection) {
             showCustomerView(connection, makePurchase);
           }
           else {
-            // showCustomerView(connection, generalQuery);
             connection.end();
             process.exit();
           }
