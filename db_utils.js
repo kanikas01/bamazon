@@ -80,9 +80,13 @@ function getProductTableInfo(myObj) {
     if (error) throw error;
     myObj.numProducts = results.length;
     myObj.departments = [];
+    myObj.productIDs = [];
     results.forEach(element => {
       if (!myObj.departments.includes(element.department_name)) {
         myObj.departments.push(element.department_name);
+      }
+      if (!myObj.productIDs.includes(element.id)) {
+        myObj.productIDs.push(String(element.id));
       }
       myObj.departments.sort();
     });
