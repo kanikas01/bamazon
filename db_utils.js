@@ -72,7 +72,7 @@ function showCustomerView(connection, callback) {
     if (callback) {
       callback(connection);
     }
-
+    
   });
 }
 
@@ -100,5 +100,3 @@ function getProductTableInfo(myObj) {
 }
 
 module.exports = { connection, showCustomerView, getProductTableInfo };
-
-
