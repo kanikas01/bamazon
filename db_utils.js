@@ -1,4 +1,6 @@
 
+// ---------- Imports and global vars ---------- //
+
 require('dotenv').config();
 var chalk = require('chalk');
 var mysql = require('mysql');
